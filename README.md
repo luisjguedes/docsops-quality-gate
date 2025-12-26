@@ -1,16 +1,39 @@
 # DocsOps Quality Gate
 
-A staff-level, drop-in **docs quality gate** for Pull Requests: **lint**, **links**, **style/terminology**, plus a simple **0–100 scorecard**.
+A drop-in **documentation quality gate** for Pull Requests.  
+Runs **lint + link checks + style/terminology**, then rolls everything up into a simple **0–100 scorecard** with an optional fail threshold.
 
-This repo ships:
-- A Python CLI: `docsops score | report | check`
-- A PR workflow that posts a rich summary in GitHub Actions
-- A reusable composite action (`action/action.yml`) to embed into other repos
+Designed to be:
+- **Writer-friendly** (actionable summaries, low noise)
+- **CI-native** (reproducible, configurable, works in PRs)
 
-## What it checks (v1)
-- **markdownlint-cli2**: Markdown conventions
-- **lychee**: Broken link detection
-- **Vale**: Terminology/style guide checks
+---
+
+## What it does
+
+- Computes a **Docs Quality Score (0–100)** from:
+  - **markdownlint** (Markdown conventions)
+  - **lychee** (broken links)
+  - **Vale** (style/terminology)
+- Publishes a clean report in the **GitHub Actions Step Summary**
+- Optionally **fails the workflow** if score drops below a threshold (default: **85**)
+
+> Add a screenshot here after running a demo PR:
+> `docs/assets/quality-gate-summary.png`
+
+---
+
+## What’s included
+
+- **Python CLI**: `docsops score | report | check`
+- **GitHub workflow**: `.github/workflows/quality-gate.yml`
+- **Reusable composite Action**: `action/action.yml`
+- Starter configs:
+  - `configs/markdownlint-cli2.yaml`
+  - `configs/lychee.toml`
+  - `configs/vale/...`
+
+---
 
 ## Quickstart (local)
 
@@ -23,19 +46,3 @@ mkdir -p reports
 docsops score
 docsops report
 docsops check --min-score 85
-```
-
-## Use in another repo (as an action)
-
-```yaml
-- uses: luisjguedes/docsops-quality-gate@main
-  with:
-    min_score: "85"
-```
-
-## Why recruiters care
-This demonstrates **Docs-as-Code seniority**:
-- operational thinking (quality gates, adoption thresholds)
-- tooling integration in CI
-- measurable quality signals (scorecard + breakdown)
-- configs you can tailor to a company style guide
