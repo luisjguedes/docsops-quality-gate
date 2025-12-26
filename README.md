@@ -17,9 +17,7 @@ Designed to be:
   - **Vale** (style/terminology)
 - Publishes a clean report in the **GitHub Actions Step Summary**
 - Optionally **fails the workflow** if score drops below a threshold (default: **85**)
-
-> Add a screenshot here after running a demo PR:
-> `docs/assets/quality-gate-summary.png`
+![Quality Gate summary](docs/assets/quality-gate-summary.png)
 
 ---
 
