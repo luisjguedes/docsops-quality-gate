@@ -1,0 +1,56 @@
+name: DocsOps Quality Gate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install docsops CLI
+        run: pip install -e .
+
+      - name: Setup Node (for markdownlint)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Prepare reports folder
+        run: mkdir -p reports
+
+      - name: markdownlint (JSON)
+        continue-on-error: true
+        run: |
+          npm i -g markdownlint-cli2
+          markdownlint-cli2 "**/*.md" "#node_modules" --json > reports/markdownlint.json
+
+      - name: lychee link check (JSON)
+        continue-on-error: true
+        run: |
+          LYCH_VER="0.15.1"
+          curl -sSfL "https://github.com/lycheeverse/lychee/releases/download/v${LYCH_VER}/lychee-v${LYCH_VER}-x86_64-unknown-linux-gnu.tar.gz" | tar -xz
+          ./lychee --config configs/lychee.toml --format json "**/*.md" > reports/lychee.json
+
+      - name: Vale (JSON)
+        continue-on-error: true
+        run: |
+          VALE_VER="3.7.1"
+          curl -sSfL "https://github.com/errata-ai/vale/releases/download/v${VALE_VER}/vale_${VALE_VER}_Linux_64-bit.tar.gz" | tar -xz
+          ./vale --config configs/vale/.vale.ini --output=JSON . > reports/vale.json
+
+      - name: Score summary
+        run: |
+          docsops report > reports/summary.md
+          cat reports/summary.md >> "$GITHUB_STEP_SUMMARY"
+          docsops score > reports/score.json
+
+      - name: Enforce minimum score
+        run: docsops check --min-score 85

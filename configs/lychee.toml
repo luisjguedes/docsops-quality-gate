@@ -1,0 +1,5 @@
+exclude_loopback = true
+timeout = 20
+max_retries = 2
+user_agent = "docsops-quality-gate"
+accept = ["200", "204", "206", "301", "302", "303", "307", "308", "401", "403"]

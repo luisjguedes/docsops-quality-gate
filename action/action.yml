@@ -1,0 +1,54 @@
+name: "DocsOps Quality Gate"
+description: "Runs docs checks + computes a scorecard and enforces a minimum score."
+inputs:
+  min_score:
+    description: "Minimum score to pass"
+    required: false
+    default: "85"
+
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: mkdir -p reports
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - shell: bash
+      run: pip install -e .
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: markdownlint (JSON)
+      shell: bash
+      continue-on-error: true
+      run: |
+        npm i -g markdownlint-cli2
+        markdownlint-cli2 "**/*.md" "#node_modules" --json > reports/markdownlint.json
+
+    - name: lychee link check (JSON)
+      shell: bash
+      continue-on-error: true
+      run: |
+        LYCH_VER="0.15.1"
+        curl -sSfL "https://github.com/lycheeverse/lychee/releases/download/v${LYCH_VER}/lychee-v${LYCH_VER}-x86_64-unknown-linux-gnu.tar.gz" | tar -xz
+        ./lychee --config configs/lychee.toml --format json "**/*.md" > reports/lychee.json
+
+    - name: Vale (JSON)
+      shell: bash
+      continue-on-error: true
+      run: |
+        VALE_VER="3.7.1"
+        curl -sSfL "https://github.com/errata-ai/vale/releases/download/v${VALE_VER}/vale_${VALE_VER}_Linux_64-bit.tar.gz" | tar -xz
+        ./vale --config configs/vale/.vale.ini --output=JSON . > reports/vale.json
+
+    - name: Compute + enforce score
+      shell: bash
+      run: |
+        docsops report > reports/summary.md
+        cat reports/summary.md >> "$GITHUB_STEP_SUMMARY"
+        docsops check --min-score "${{ inputs.min_score }}"

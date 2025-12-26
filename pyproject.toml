@@ -1,0 +1,17 @@
+[project]
+name = "docsops-quality-gate"
+version = "0.1.0"
+description = "DocsOps quality gate: lint, links, style + scorecard for docs PRs"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "typer>=0.12",
+  "pydantic>=2.0",
+]
+
+[project.scripts]
+docsops = "docsops_quality_gate.cli:app"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"

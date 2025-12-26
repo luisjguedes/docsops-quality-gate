@@ -1,0 +1,9 @@
+site_name: DocsOps Quality Gate
+theme:
+  name: material
+repo_url: https://github.com/luisjguedes/docsops-quality-gate
+repo_name: luisjguedes/docsops-quality-gate
+edit_uri: edit/main/docs/
+nav:
+  - Home: index.md
+  - Example: example.md
